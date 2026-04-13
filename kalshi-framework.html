@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalshi — International Market Entry Framework</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #ffffff;
+    --bg2: #f7f7f5;
+    --bg3: #f0efe9;
+    --text: #1a1a18;
+    --text2: #6b6a64;
+    --text3: #9c9a92;
+    --border: rgba(0,0,0,0.10);
+    --border2: rgba(0,0,0,0.18);
+    --radius: 8px;
+    --radius-lg: 12px;
+    --green: #1D9E75; --green-bg: #E1F5EE; --green-text: #085041; --green-dark: #04342C;
+    --amber: #BA7517; --amber-bg: #FAEEDA; --amber-text: #633806; --amber-dark: #412402;
+    --red: #E24B4A;   --red-bg: #FCEBEB;   --red-text: #791F1F;   --red-dark: #501313;
+    --blue: #378ADD;  --blue-bg: #E6F1FB;  --blue-text: #0C447C;
+    --purple: #7F77DD; --purple-bg: #EEEDFE; --purple-text: #3C3489;
+    --teal: #5DCAA5;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1a18; --bg2: #242421; --bg3: #2c2c2a;
+      --text: #e8e6de; --text2: #9c9a92; --text3: #6b6a64;
+      --border: rgba(255,255,255,0.10); --border2: rgba(255,255,255,0.18);
+      --green-bg: #04342C; --green-text: #9FE1CB;
+      --amber-bg: #412402; --amber-text: #FAC775;
+      --red-bg: #501313;   --red-text: #F7C1C1;
+      --blue-bg: #042C53;  --blue-text: #B5D4F4;
+      --purple-bg: #26215C; --purple-text: #CECBF6;
+    }
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: var(--bg3);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem 1rem;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .page {
+    max-width: 780px;
+    margin: 0 auto;
+  }
+
+  .page-header {
+    margin-bottom: 2rem;
+  }
+
+  .page-header h1 {
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .page-header p {
+    font-size: 13px;
+    color: var(--text2);
+  }
+
+  .kalshi-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text2);
+    border: 0.5px solid var(--border2);
+    border-radius: 20px;
+    padding: 3px 10px;
+    margin-bottom: 1rem;
+  }
+
+  .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    display: inline-block;
+  }
+
+  .card {
+    background: var(--bg);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 1.5rem;
+    border-bottom: 0.5px solid var(--border);
+    padding-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .tab {
+    font-size: 13px;
+    padding: 6px 14px;
+    border-radius: var(--radius);
+    border: 0.5px solid transparent;
+    cursor: pointer;
+    color: var(--text2);
+    background: none;
+    transition: all .15s;
+    font-family: inherit;
+  }
+
+  .tab:hover { color: var(--text); }
+  .tab.active {
+    border-color: var(--border2);
+    color: var(--text);
+    background: var(--bg2);
+  }
+
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* Progress */
+  .progress { display: flex; gap: 4px; margin-bottom: 1.5rem; }
+  .pip { height: 3px; flex: 1; border-radius: 2px; background: var(--border2); transition: background .3s; }
+  .pip.done { background: var(--green); }
+  .pip.cur  { background: var(--blue); }
+
+  .gate-label { font-size: 11px; font-weight: 500; color: var(--text2); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 5px; }
+  .gate-q     { font-size: 18px; font-weight: 500; color: var(--text); margin-bottom: 8px; line-height: 1.35; }
+  .gate-why   { font-size: 13px; color: var(--text2); line-height: 1.65; margin-bottom: 1.25rem; border-left: 2px solid var(--border2); padding-left: 12px; }
+  .gate-why strong { color: var(--text); font-weight: 500; }
+
+  .choices { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1.25rem; }
+  .choice {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 12px 14px;
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+  }
+  .choice:hover { border-color: var(--border2); background: var(--bg2); }
+  .choice.sel   { border-color: var(--blue); background: var(--blue-bg); }
+  .choice-dot {
+    width: 16px; height: 16px; border-radius: 50%;
+    border: 1.5px solid var(--border2);
+    flex-shrink: 0; margin-top: 2px;
+    transition: background .15s, border-color .15s;
+  }
+  .choice.sel .choice-dot { background: var(--blue); border-color: var(--blue); }
+  .choice-text { font-size: 13px; color: var(--text); line-height: 1.5; font-weight: 500; }
+  .choice-sub  { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+  .btn-row { display: flex; gap: 8px; align-items: center; }
+  .btn {
+    font-size: 13px; padding: 7px 16px;
+    border-radius: var(--radius);
+    border: 0.5px solid var(--border2);
+    cursor: pointer;
+    background: var(--bg);
+    color: var(--text);
+    font-family: inherit;
+    transition: background .15s;
+  }
+  .btn:hover { background: var(--bg2); }
+  .btn:disabled { opacity: .38; cursor: default; }
+  .btn.primary { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .btn.primary:hover { opacity: .88; }
+
+  .step-counter { font-size: 12px; color: var(--text3); margin-left: auto; }
+
+  /* Verdict */
+  .verdict { padding: 1.25rem; border-radius: var(--radius-lg); border: 0.5px solid; margin-top: 1rem; }
+  .verdict.go    { border-color: var(--green); background: var(--green-bg); }
+  .verdict.watch { border-color: var(--amber); background: var(--amber-bg); }
+  .verdict.no    { border-color: var(--red);   background: var(--red-bg);   }
+  .verdict-title { font-size: 15px; font-weight: 500; margin-bottom: 6px; }
+  .verdict.go    .verdict-title, .verdict.go    .verdict-body { color: var(--green-text); }
+  .verdict.watch .verdict-title, .verdict.watch .verdict-body { color: var(--amber-text); }
+  .verdict.no    .verdict-title, .verdict.no    .verdict-body { color: var(--red-text);   }
+  .verdict-body  { font-size: 13px; line-height: 1.65; }
+  .score-breakdown { margin-top: .75rem; font-size: 13px; color: var(--text2); }
+
+  /* Compare */
+  .cmp-select { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1rem; align-items: center; }
+  .cmp-label  { font-size: 12px; color: var(--text2); }
+  .cmp-btn {
+    font-size: 12px; padding: 4px 10px;
+    border-radius: 20px;
+    border: 0.5px solid var(--border);
+    cursor: pointer; color: var(--text2); background: none;
+    font-family: inherit; transition: all .15s;
+  }
+  .cmp-btn.on { background: var(--bg2); border-color: var(--border2); color: var(--text); }
+
+  .compare-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+    margin-bottom: 1rem;
+  }
+
+  .ccard {
+    background: var(--bg);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1rem;
+  }
+
+  .ccard-flag { font-size: 22px; margin-bottom: 6px; }
+  .ccard-name { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 10px; }
+
+  .dim-row   { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
+  .dim-lbl   { font-size: 10px; color: var(--text2); width: 96px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dim-bar   { flex: 1; height: 4px; border-radius: 2px; background: var(--border2); overflow: hidden; }
+  .dim-fill  { height: 4px; border-radius: 2px; transition: width .4s; }
+  .dim-num   { font-size: 11px; font-weight: 500; min-width: 22px; text-align: right; }
+
+  .ccard-verdict {
+    margin-top: 10px; padding-top: 10px;
+    border-top: 0.5px solid var(--border);
+    font-size: 11px; color: var(--text2); line-height: 1.55;
+  }
+  .cmp-note { font-size: 12px; color: var(--text3); }
+
+  /* Framework */
+  .fwk-gate { margin-bottom: 10px; border: 0.5px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+  .fwk-header {
+    padding: 10px 14px;
+    background: var(--bg2);
+    display: flex; align-items: center; gap: 10px;
+    cursor: pointer; user-select: none;
+  }
+  .fwk-num {
+    width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 500; flex-shrink: 0;
+  }
+  .fwk-title { font-size: 13px; font-weight: 500; color: var(--text); flex: 1; }
+  .kill-badge {
+    display: inline-block; font-size: 10px; font-weight: 500;
+    padding: 1px 6px; border-radius: 8px;
+    background: var(--red-bg); color: var(--red-text);
+    margin-left: 6px;
+  }
+  .fwk-sub   { font-size: 11px; color: var(--text2); }
+  .fwk-arrow { font-size: 14px; color: var(--text3); flex-shrink: 0; }
+  .fwk-body  {
+    padding: 14px 16px;
+    font-size: 13px; color: var(--text2);
+    line-height: 1.7;
+    border-top: 0.5px solid var(--border);
+    display: none;
+  }
+  .fwk-body strong { color: var(--text); font-weight: 500; }
+  .fwk-body ul { margin: 6px 0 0 18px; }
+  .fwk-body li { margin-bottom: 3px; }
+  .fwk-body br { display: block; content: ''; margin-top: 8px; }
+
+  /* Footer */
+  .footer {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 0.5px solid var(--border);
+    font-size: 12px;
+    color: var(--text3);
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="page-header">
+    <div class="kalshi-badge"><span class="dot"></span> Built for Kalshi — International Expansion role</div>
+    <h1>International market entry framework</h1>
+    <p>A five-gate decision framework for evaluating and prioritizing new markets — built around Kalshi's specific regulatory classification challenge</p>
+  </div>
+
+  <div class="card">
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('walk')">Walk through a market</button>
+      <button class="tab" onclick="showTab('compare')">Compare markets</button>
+      <button class="tab" onclick="showTab('framework')">The framework logic</button>
+    </div>
+
+    <!-- WALKTHROUGH -->
+    <div class="view active" id="view-walk">
+      <div style="max-width:580px">
+        <div class="progress" id="progress"></div>
+        <div id="gate-content"></div>
+      </div>
+    </div>
+
+    <!-- COMPARE -->
+    <div class="view" id="view-compare">
+      <div class="cmp-select">
+        <span class="cmp-label">Markets:</span>
+        <div id="cmp-btns"></div>
+      </div>
+      <div class="compare-grid" id="compare-grid"></div>
+      <p class="cmp-note">Gate 1 (regulatory classification) is weighted 2× — it's the make-or-break variable for Kalshi specifically.</p>
+    </div>
+
+    <!-- FRAMEWORK -->
+    <div class="view" id="view-framework">
+      <div id="fwk-wrap"></div>
+    </div>
+  </div>
+
+  <div class="footer">Built as a prototype for the Kalshi international expansion role application.</div>
+</div>
+
+<script>
+const GATES = [
+  {
+    label: 'Gate 1 — The classification question',
+    q: 'Can event contracts plausibly be classified as financial derivatives (not gambling) in this jurisdiction?',
+    why: `This is the only question that truly matters first. <strong>Everything downstream is irrelevant if the answer is no.</strong> Kalshi's entire regulatory thesis is that event contracts are CFTC-regulated derivatives, not bets. That designation is US-specific — every new market requires its own legal theory. If no plausible derivatives pathway exists, you're building on sand.`,
+    choices: [
+      { label: 'Yes — clear derivatives framework exists', sub: 'e.g. ASIC (AU), FINMA (CH), BaFin (DE)', score: 3 },
+      { label: 'Ambiguous — fintech sandbox or untested pathway', sub: 'e.g. OJK sandbox (ID), CNBV fintech law (MX)', score: 1 },
+      { label: 'No — gambling authority would claim jurisdiction', sub: 'e.g. most of South/Southeast Asia currently', score: -3 },
+    ]
+  },
+  {
+    label: 'Gate 2 — Regulatory ownership',
+    q: 'Is there one clear regulatory authority to engage, or will financial and gambling regulators fight over jurisdiction?',
+    why: `The US state-level battle — CFTC vs state gaming commissions in Nevada, Massachusetts, Ohio — plays out internationally too but with no home-court advantage. <strong>A jurisdictional war means high legal costs, unpredictable timelines, and any win can be reversed.</strong> One regulator means one relationship to build, one argument to make.`,
+    choices: [
+      { label: 'Single regulator with clear jurisdiction', sub: 'e.g. FINMA (CH), ASIC (AU)', score: 2 },
+      { label: 'Two regulators but derivatives has clear primacy', sub: 'Established legal precedent exists', score: 1 },
+      { label: 'Two regulators actively competing', sub: 'No precedent — political risk is high', score: -2 },
+    ]
+  },
+  {
+    label: 'Gate 3 — The Brazil test',
+    q: 'Does a credible local licensed partner exist who can own the regulatory relationship?',
+    why: `Direct licensing across 40 markets is a 10-year project. <strong>The Brazil model compresses that: local partner holds the license and manages the regulatory relationship, Kalshi provides the exchange technology and market design.</strong> The partner needs a financial license, distribution reach, and enough regulatory credibility that their endorsement matters.`,
+    choices: [
+      { label: 'Yes — strong licensed financial partner identifiable', sub: 'e.g. XP Inc. (BR), Swissquote (CH), IG Group (AU)', score: 2 },
+      { label: 'Partial — fintech players but limited regulatory credibility', sub: 'Distribution reach exists but licensing is thin', score: 0 },
+      { label: 'No — would require direct licensing or grey-area operation', sub: 'Slow or legally risky', score: -1 },
+    ]
+  },
+  {
+    label: 'Gate 4 — Sports sequencing',
+    q: 'Should this market launch with non-sports contracts first?',
+    why: `Sports is 89% of Kalshi's US revenue but 100% of the international regulatory risk. In most markets, <strong>launching sports contracts first triggers the gambling authority and poisons the regulatory relationship before "financial derivative" framing is established.</strong> Exception: markets where sports betting is already fully legalized — the battle is already won.`,
+    choices: [
+      { label: 'Non-sports first — financial, macro, political events', sub: 'Slower growth but builds regulatory credibility', score: 2 },
+      { label: 'Sports first in a market where betting is already legal', sub: 'Legal sports betting means permissive environment', score: 1 },
+      { label: 'Sports first regardless', sub: 'Maximizes volume but triggers gambling regulator', score: -1 },
+    ]
+  },
+  {
+    label: 'Gate 5 — Market quality',
+    q: 'How large is the active investor base and how frequently do high-salience contested events occur?',
+    why: `Raw population is a vanity metric. <strong>What matters is how many people already trade financial products</strong> (they understand derivatives) and how frequently contested, high-stakes events occur. A 5M-person market with 20% active investors and frequent elections beats a 100M-person market where 0.5% trade.`,
+    choices: [
+      { label: 'High financial sophistication + high event density', sub: 'Investors understand derivatives; regular contested events', score: 2 },
+      { label: 'High event density but lower financial sophistication', sub: 'Cultural PMF exists; education required', score: 1 },
+      { label: 'Neither — primarily retail consumer market', sub: 'Long payback; product-market fit unclear', score: 0 },
+    ]
+  }
+];
+
+const EXAMPLES = {
+  'Australia':    { flag:'🇦🇺', scores:[3,2,2,2,2], verdict:'go',    why:'Strongest candidate. ASIC derivatives framework is clear, IG Markets is the obvious partner, sophisticated investor base. Sequence: financial/macro first, then AFL/NRL sports once ASIC relationship is established.' },
+  'Switzerland':  { flag:'🇨🇭', scores:[3,2,2,2,1], verdict:'go',    why:'FINMA is the cleanest derivatives regulator in Europe and not EU-bound. Small market but a FINMA approval is a credibility beacon for the broader EU regulatory argument.' },
+  'Brazil':       { flag:'🇧🇷', scores:[2,1,3,1,1], verdict:'go',    why:'Already launched via XP. Partner quality more than compensates for regulatory ambiguity. Priority: expand XP distribution from international accounts to full domestic access.' },
+  'UAE':          { flag:'🇦🇪', scores:[2,2,2,2,1], verdict:'go',    why:'DIFC/ADGM fintech sandboxes are genuinely innovation-friendly. eToro is a credible distribution partner. Geopolitical event density (oil, regional elections) is uniquely high.' },
+  'Germany':      { flag:'🇩🇪', scores:[2,-2,1,2,2], verdict:'watch', why:'GGL (gambling authority) is actively hostile. BaFin derivatives pathway exists in theory but GGL will fight jurisdiction. Wait for US regulatory wins to solidify the global derivatives narrative, then approach.' },
+  'UK':           { flag:'🇬🇧', scores:[1,-2,2,2,2], verdict:'watch', why:'Highest prize in Europe but currently restricted. FCA vs UKGC jurisdiction battle mirrors US state-level problems. Post-Brexit regulatory flexibility is the unlock.' },
+  'India':        { flag:'🇮🇳', scores:[-3,-2,0,0,2], verdict:'no',   why:'Online Gaming Act (2023) is a near-complete blocker. Gambling authority has primary jurisdiction. Enormous TAM but the legal framework needs to change first. 5-year horizon minimum.' },
+};
+
+let curStep = 0, answers = [];
+let selectedCountries = ['Australia','Switzerland','Brazil','UAE'];
+
+function showTab(t) {
+  document.querySelectorAll('.tab').forEach(b => {
+    const map = { walk:'walk', compare:'compare', framework:'framework' };
+    b.classList.toggle('active', b.getAttribute('onclick').includes(t));
+  });
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + t).classList.add('active');
+  if (t === 'compare') buildCompare();
+  if (t === 'framework') buildFramework();
+}
+
+function dimColor(s) {
+  return s >= 2 ? '#1D9E75' : s >= 0 ? '#EF9F27' : '#E24B4A';
+}
+
+/* ── WALKTHROUGH ── */
+function buildWalkthrough() {
+  const prog = document.getElementById('progress');
+  prog.innerHTML = GATES.map((_, i) =>
+    `<div class="pip ${i < curStep ? 'done' : i === curStep ? 'cur' : ''}"></div>`
+  ).join('');
+
+  if (curStep >= GATES.length) { showVerdict(); return; }
+
+  const g = GATES[curStep];
+  const sel = answers[curStep];
+
+  document.getElementById('gate-content').innerHTML = `
+    <div class="gate-label">${g.label}</div>
+    <div class="gate-q">${g.q}</div>
+    <div class="gate-why">${g.why}</div>
+    <div class="choices">
+      ${g.choices.map((c, i) => `
+        <div class="choice ${sel === i ? 'sel' : ''}" onclick="select(${i})">
+          <div class="choice-dot"></div>
+          <div>
+            <div class="choice-text">${c.label}</div>
+            <div class="choice-sub">${c.sub}</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="btn-row">
+      <button class="btn" onclick="prev()" ${curStep === 0 ? 'disabled' : ''}>Back</button>
+      <button class="btn primary" onclick="next()" ${sel === undefined ? 'disabled' : ''}>
+        ${curStep === GATES.length - 1 ? 'See verdict' : 'Next gate'}
+      </button>
+      <span class="step-counter">Gate ${curStep + 1} of ${GATES.length}</span>
+    </div>
+  `;
+}
+
+function select(i) { answers[curStep] = i; buildWalkthrough(); }
+function next()    { if (answers[curStep] !== undefined) { curStep++; buildWalkthrough(); } }
+function prev()    { if (curStep > 0) { curStep--; buildWalkthrough(); } }
+
+function showVerdict() {
+  let score = 0;
+  answers.forEach((a, gi) => { score += GATES[gi].choices[a].score; });
+  const maxScore = GATES.reduce((s, g) => s + Math.max(...g.choices.map(c => c.score)), 0);
+
+  const killG1 = answers[0] === 2;
+  const killG2 = answers[1] === 2 && score < 4;
+
+  let cls, title, body;
+  if (killG1) {
+    cls = 'no'; title = 'Do not enter — regulatory blocker';
+    body = 'The derivatives classification question (Gate 1) is a hard no. Without a plausible legal theory that positions event contracts as financial instruments, every other investment is wasted. Monitor this market for regulatory reform.';
+  } else if (killG2) {
+    cls = 'no'; title = 'Not yet — jurisdictional battle risk';
+    body = "Two regulators competing with no precedent for derivatives primacy. Let the US CFTC preemption arguments accumulate globally, then re-approach when the legal theory is stronger.";
+  } else if (score >= 8) {
+    cls = 'go'; title = `High priority — enter now`;
+    body = 'This market clears the key gates. Sequence: (1) confirm derivatives classification with local counsel, (2) identify and approach top 2 partner candidates, (3) file for regulatory sandbox or derivatives authorization, (4) launch with non-sports contracts first. Target 12–18 months to soft launch.';
+  } else if (score >= 4) {
+    cls = 'watch'; title = `Monitor — conditional opportunity`;
+    body = 'Real potential but one or more gates introduce material risk. Assign a low-priority track: monitor regulatory reform, identify potential partners, build the legal theory. Full entry push when the blocking condition resolves.';
+  } else {
+    cls = 'no'; title = `Deprioritize`;
+    body = 'Too many gates show risk. Resource cost of entry outweighs near-term opportunity. Revisit in 12–24 months or when a specific blocking condition changes.';
+  }
+
+  const breakdown = answers.map((a, gi) => {
+    const s = GATES[gi].choices[a].score;
+    const col = s >= 2 ? '#1D9E75' : s >= 0 ? '#BA7517' : '#E24B4A';
+    return `<span style="color:${col};font-weight:600">${s > 0 ? '+' : ''}${s}</span>`;
+  }).join(' + ');
+
+  document.getElementById('gate-content').innerHTML = `
+    <div class="verdict ${cls}">
+      <div class="verdict-title">${title}</div>
+      <div class="verdict-body">${body}</div>
+    </div>
+    <div class="score-breakdown">Gate scores: ${breakdown} = <strong>${score}</strong> / ${maxScore}</div>
+    <div class="btn-row" style="margin-top:1rem;flex-wrap:wrap">
+      <button class="btn" onclick="curStep=0;answers=[];buildWalkthrough()">Evaluate another market</button>
+      <button class="btn" onclick="showTab('compare')">See worked examples →</button>
+    </div>
+  `;
+
+  document.querySelectorAll('.pip').forEach(p => { p.classList.remove('cur'); p.classList.add('done'); });
+}
+
+/* ── COMPARE ── */
+function buildCompare() {
+  const btns = document.getElementById('cmp-btns');
+  btns.style.display = 'flex';
+  btns.style.gap = '6px';
+  btns.style.flexWrap = 'wrap';
+  btns.innerHTML = Object.keys(EXAMPLES).map(c =>
+    `<button class="cmp-btn ${selectedCountries.includes(c) ? 'on' : ''}" onclick="toggleCountry('${c}')">${EXAMPLES[c].flag} ${c}</button>`
+  ).join('');
+
+  const dimNames = ['Derivatives path','Single regulator','Partner exists','Non-sports first','Market quality'];
+  document.getElementById('compare-grid').innerHTML = selectedCountries.map(name => {
+    const ex = EXAMPLES[name];
+    const total = ex.scores.reduce((a, b) => a + b, 0);
+    const cls = total >= 8 ? 'go' : total >= 4 ? 'watch' : 'no';
+    const vcol = cls === 'go' ? 'var(--green-text)' : cls === 'watch' ? 'var(--amber-text)' : 'var(--red-text)';
+    const vlabel = cls === 'go' ? 'Enter now' : cls === 'watch' ? 'Monitor' : 'Deprioritize';
+    return `
+      <div class="ccard">
+        <div class="ccard-flag">${ex.flag}</div>
+        <div class="ccard-name">${name}</div>
+        ${ex.scores.map((s, i) => `
+          <div class="dim-row">
+            <div class="dim-lbl">${dimNames[i]}</div>
+            <div class="dim-bar"><div class="dim-fill" style="width:${Math.max(0, (s + 3) / 6 * 100)}%;background:${dimColor(s)}"></div></div>
+            <div class="dim-num" style="color:${dimColor(s)}">${s > 0 ? '+' : ''}${s}</div>
+          </div>
+        `).join('')}
+        <div class="ccard-verdict">
+          <strong style="color:${vcol}">${vlabel}</strong> — ${ex.why}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleCountry(c) {
+  if (selectedCountries.includes(c)) {
+    if (selectedCountries.length > 1) selectedCountries = selectedCountries.filter(x => x !== c);
+  } else {
+    if (selectedCountries.length < 6) selectedCountries.push(c);
+  }
+  buildCompare();
+}
+
+/* ── FRAMEWORK ── */
+const FWK = [
+  { num:'1', color:'#E24B4A', bg:'#FCEBEB', kill:true, title:'Derivatives classification', sub:'Hard stop if no',
+    body:`<strong>The question:</strong> Can event contracts legally be classified as financial derivatives — not gambling — under this country's existing regulatory framework?<br><br><strong>Why it comes first:</strong> Kalshi's US model rests entirely on CFTC designation as a Designated Contract Market. That designation is US-specific. Every new market requires rebuilding the legal theory from scratch. If no plausible derivatives pathway exists, nothing else matters.<br><br><strong>What to look for:</strong><ul><li>Does a financial markets regulator have jurisdiction over OTC or exchange-traded derivatives?</li><li>Have event-based products ever been classified as derivatives here?</li><li>Is there a fintech sandbox that could house novel instruments?</li></ul><strong>Kill condition:</strong> Gambling authority has exclusive jurisdiction and no derivatives carveout exists.`
+  },
+  { num:'2', color:'#BA7517', bg:'#FAEEDA', kill:true, title:'Regulatory ownership', sub:'One regulator vs two',
+    body:`<strong>The question:</strong> Will one regulator own this product, or will financial and gambling authorities compete for jurisdiction?<br><br><strong>Why it matters:</strong> The US state-level battle — CFTC vs state gaming commissions in Nevada, Massachusetts, Ohio — plays out internationally with no home-court advantage. A jurisdictional war means high legal costs, unpredictable timelines, and decisions that can be reversed.<br><br><strong>Kill condition:</strong> Two actively hostile regulators with no precedent for derivatives primacy.`
+  },
+  { num:'3', color:'#1D9E75', bg:'#E1F5EE', kill:false, title:'The Brazil test', sub:'Can we find a partner?',
+    body:`<strong>The question:</strong> Does a credible local licensed financial institution exist who can serve as the regulatory-facing operating partner?<br><br><strong>Why Kalshi can't go alone:</strong> Direct licensing across 40 markets is a 10-year project. The Brazil model — local partner holds the license, Kalshi provides exchange technology and market design — compresses that significantly.<br><br><strong>Ideal partner profile:</strong><ul><li>Digital brokerage with retail derivatives experience</li><li>Existing regulatory relationships with the target authority</li><li>Incentive to differentiate their product offering</li><li>English-speaking leadership (reduces friction)</li></ul>`
+  },
+  { num:'4', color:'#378ADD', bg:'#E6F1FB', kill:false, title:'Sports sequencing', sub:'Non-sports first?',
+    body:`<strong>The question:</strong> Should we launch with non-sports event contracts to establish the derivatives framing before introducing sports?<br><br><strong>The core tension:</strong> Sports is 89% of Kalshi's US revenue. It's also 100% of the international regulatory risk. In most markets, sports contracts trigger the gambling authority and frame Kalshi as a sportsbook — the exact narrative to avoid.<br><br><strong>Recommended sequencing:</strong><ul><li><strong>Phase 1:</strong> Financial events (rate decisions, inflation prints, elections) — establishes derivatives precedent</li><li><strong>Phase 2:</strong> Cultural events — broadens user base without regulatory risk</li><li><strong>Phase 3:</strong> Sports — only after derivatives classification is legally settled</li></ul><strong>Exception:</strong> Markets where sports betting is already fully legalized.`
+  },
+  { num:'5', color:'#7F77DD', bg:'#EEEDFE', kill:false, title:'Market quality', sub:'Sophistication × event density',
+    body:`<strong>The question:</strong> How large is the active investor base, and how frequently do high-salience contested events occur?<br><br><strong>Why raw population is a vanity metric:</strong> 100M people in a country where 0.5% trade financial products is a smaller TAM than 10M people where 20% do. What matters: people who already understand "I'm buying a contract, not making a bet."<br><br><strong>Two dimensions:</strong><ul><li><strong>Financial sophistication:</strong> active brokerage accounts per capita, retail derivatives volumes</li><li><strong>Event density:</strong> frequency of contested elections, major sporting events, macro policy decisions with uncertain outcomes</li></ul>`
+  }
+];
+
+function buildFramework() {
+  document.getElementById('fwk-wrap').innerHTML = FWK.map((g, i) => `
+    <div class="fwk-gate">
+      <div class="fwk-header" onclick="toggleGate(${i})">
+        <div class="fwk-num" style="background:${g.bg};color:${g.color}">${g.num}</div>
+        <div style="flex:1">
+          <div class="fwk-title">${g.title}${g.kill ? '<span class="kill-badge">kill gate</span>' : ''}</div>
+          <div class="fwk-sub">${g.sub}</div>
+        </div>
+        <div class="fwk-arrow" id="arr${i}">+</div>
+      </div>
+      <div class="fwk-body" id="body${i}">${g.body}</div>
+    </div>
+  `).join('');
+}
+
+function toggleGate(i) {
+  const b = document.getElementById('body' + i);
+  const a = document.getElementById('arr' + i);
+  const open = b.style.display === 'block';
+  b.style.display = open ? 'none' : 'block';
+  a.textContent = open ? '+' : '−';
+}
+
+buildWalkthrough();
+</script>
+</body>
+</html>

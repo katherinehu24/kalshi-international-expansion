@@ -10,9 +10,7 @@ An interactive decision framework for evaluating and prioritizing international 
 
 Kalshi's October 2025 global launch — 140 countries, announced alongside the Series D — didn't fully land. Users in India, Nigeria, and Brazil reported they couldn't sign up. The app stayed US-only. Volume didn't move.
 
-That gap between the announcement and the reality is the actual problem. And it's not a technology problem. It's that access without regulatory cover recreates the "offshore gambling site" narrative Kalshi is trying to escape.
-
-This framework is an attempt to think through what a real market entry process looks like — starting with the question that determines everything else.
+That gap between the announcement and the reality is not a technology problem — it's narrative and regulatory misalignment. This project presents a frameowkr to identify key geographies where regulatory support is strongest to guide Kalshi's international expansion moving forward. 
 
 ---
 
@@ -55,6 +53,6 @@ The framework also evaluates markets independently. It doesn't model which entry
 
 ---
 
-## Built with
+## End Notes
 
-Claude. The reasoning is mine.
+Coded with Claude. The reasoning is mine.

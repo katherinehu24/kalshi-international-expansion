@@ -51,8 +51,3 @@ The partner scoring is too binary. The difference between a weak partner and no 
 
 The framework also evaluates markets independently. It doesn't model which entry creates regulatory precedent that makes the next one easier — Switzerland to Germany, Australia to New Zealand. That sequencing logic is missing and is probably where the most interesting thinking lives.
 
----
-
-## End Notes
-
-Coded with Claude. The reasoning is mine.
